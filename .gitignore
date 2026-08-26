@@ -39,3 +39,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# repository hygiene
+!.env.example
+/.playwright-mcp/
+/*.png
+
+# Ignore arbitrary Markdown; keep canonical project documentation.
+*.md
+!README.md
+!AGENTS.md
+!CLAUDE.md
+!docs/
+!docs/**/*.md

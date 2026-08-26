@@ -1,0 +1,15 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "ui-layouts": {
+      "type": "local",
+      "command": ["npx", "-y", "@ui-layouts/mcp"],
+      "enable": true
+    },
+    "magicui": {
+      "type": "local",
+      "command": ["npx", "-y", "@magicuidesign/mcp@latest"],
+      "enable": true
+    }
+  }
+}
