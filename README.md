@@ -78,49 +78,50 @@ Gate: `lint && tsc && build && test:e2e`.
 
 ```mermaid
 flowchart LR
-    %% Pengguna & Frontend
-    subgraph Frontend [Client Side]
+    %% Frontend / Client
+    subgraph Client [Client Side]
         U[Browser / PWA]
         IDB[(IndexedDB)]
         U <--> IDB
     end
 
-    %% Backend & Routing
-    subgraph Backend [Vercel Hosting]
-        N[Next.js App]
+    %% Backend / Application
+    subgraph App [Next.js Application]
+        N[Next.js Server]
         CR[/api/cron/sync/]
         N --- CR
     end
 
-    %% Pemicu Otomatisasi
+    %% Automation Triggers
     subgraph Automation [Triggers]
         GH[GitHub Actions\nEvery 4h]
         VC[Vercel Cron\nDaily Backup]
     end
 
-    %% Layanan Pihak Ketiga
+    %% External Services
     subgraph Services [External Services]
         R[(Upstash Redis REST)]
         HF[Hugging Face APIs]
         OR[OpenRouter APIs]
     end
 
-    %% Hubungan Alur Data
+    %% Core Data Flow
     U --> N
     N --> HF
     N --> OR
     N <--> R
 
-    %% Alur Kerja Cron
+    %% Automation Flow
     GH --> CR
     VC --> CR
     CR --> R
 
-    %% Gaya Visual
-    style Frontend fill:#f9f9f9,stroke:#333,stroke-width:1px
-    style Backend fill:#eff6ff,stroke:#1d4ed8,stroke-width:1px
-    style Automation fill:#fff7ed,stroke:#c2410c,stroke-width:1px
-    style Services fill:#f0fdf4,stroke:#15803d,stroke-width:1px
+    %% Professional Neutral Color Styling
+    style Client fill:#f8fafc,stroke:#cbd5e1,stroke-width:1px,color:#0f172a
+    style App fill:#f1f5f9,stroke:#94a3b8,stroke-width:1px,color:#0f172a
+    style Automation fill:#f8fafc,stroke:#cbd5e1,stroke-width:1px,color:#0f172a
+    style Services fill:#f1f5f9,stroke:#94a3b8,stroke-width:1px,color:#0f172a
+
 
 ```
 
