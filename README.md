@@ -78,14 +78,50 @@ Gate: `lint && tsc && build && test:e2e`.
 
 ```mermaid
 flowchart LR
-    U[Browser/PWA] --> N[Next.js]
-    N --> R[(Upstash Redis REST)]
-    N --> HF[HF APIs]
-    N --> OR[OpenRouter APIs]
-    GH[GitHub Actions every 4h] --> CR[/api/cron/sync]
-    VC[Vercel daily backup] --> CR
+    %% Pengguna & Frontend
+    subgraph Frontend [Client Side]
+        U[Browser / PWA]
+        IDB[(IndexedDB)]
+        U <--> IDB
+    end
+
+    %% Backend & Routing
+    subgraph Backend [Vercel Hosting]
+        N[Next.js App]
+        CR[/api/cron/sync/]
+        N --- CR
+    end
+
+    %% Pemicu Otomatisasi
+    subgraph Automation [Triggers]
+        GH[GitHub Actions\nEvery 4h]
+        VC[Vercel Cron\nDaily Backup]
+    end
+
+    %% Layanan Pihak Ketiga
+    subgraph Services [External Services]
+        R[(Upstash Redis REST)]
+        HF[Hugging Face APIs]
+        OR[OpenRouter APIs]
+    end
+
+    %% Hubungan Alur Data
+    U --> N
+    N --> HF
+    N --> OR
+    N <--> R
+
+    %% Alur Kerja Cron
+    GH --> CR
+    VC --> CR
     CR --> R
-    U --> IDB[(IndexedDB)]
+
+    %% Gaya Visual
+    style Frontend fill:#f9f9f9,stroke:#333,stroke-width:1px
+    style Backend fill:#eff6ff,stroke:#1d4ed8,stroke-width:1px
+    style Automation fill:#fff7ed,stroke:#c2410c,stroke-width:1px
+    style Services fill:#f0fdf4,stroke:#15803d,stroke-width:1px
+
 ```
 
 Model, benchmark, activity, and combined caches use a four-hour TTL. Provider metadata retains its route-specific TTL.
