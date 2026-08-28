@@ -91,7 +91,7 @@ flowchart LR
     end
 
     subgraph Automation [Scheduled Sync]
-        SC[Scheduled Jobs]
+        SC[Vercel Cron daily]
     end
 
     subgraph Services [External Services]

@@ -24,12 +24,12 @@ const LAST_OR_KEY = "models:last:or";
 const LAST_BENCH_KEY = "models:last:bench";
 const LAST_ACT_KEY = "models:last:act";
 
-const HF_TTL_SECONDS = 14_400; // 4 hours
-const OR_TTL_SECONDS = 14_400; // 4 hours
-const ARENA_TTL_SECONDS = 14_400; // 4 hours
-const HF_INTERVAL_MS = 4 * 60 * 60 * 1000;
-const OR_INTERVAL_MS = 4 * 60 * 60 * 1000;
-const ARENA_INTERVAL_MS = 4 * 60 * 60 * 1000;
+const HF_TTL_SECONDS = 21_600; // 6 hours
+const OR_TTL_SECONDS = 3_600; // 1 hour
+const ARENA_TTL_SECONDS = 21_600; // 6 hours
+const HF_INTERVAL_MS = 6 * 60 * 60 * 1000;
+const OR_INTERVAL_MS = 60 * 60 * 1000;
+const ARENA_INTERVAL_MS = 6 * 60 * 60 * 1000;
 
 type SyncStatus = "skipped" | "synced" | "failed";
 
