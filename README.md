@@ -8,7 +8,7 @@
 
 <p align="center">
   <strong>The intelligent gateway to AI metadata.</strong><br />
-  Search the live frontier, inspect model/dataset metadata, chat via BYOK playground, compare models in Arena — one PWA.
+  Search the live frontier, inspect model/dataset metadata, chat via a BYOK playground, compare models in the Arena — one PWA.
 </p>
 
 <p align="center">
@@ -21,11 +21,11 @@
 </p>
 
 > [!IMPORTANT]
-> **Proprietary — Vulpix Labs.** No cloning, forking, or redistribution. 30-day evaluation only by written permission. See `LICENSE.md`.
+> **Proprietary — Vulpix Labs.** No cloning, forking, or redistribution. Evaluation access only by written permission — open an issue to request access.
 
 ## About
 
-Vulpix aggregates live metadata from Hugging Face + OpenRouter. No relational DB — upstream is source of truth, Upstash Redis (REST) is cache/lock/budget, IndexedDB is client playground.
+Vulpix aggregates live metadata from external model and dataset providers into a single hub. There's no relational database — upstream providers are the source of truth, Redis (REST) handles cache/lock/budget duties, and IndexedDB powers the client-side playground.
 
 ## Stack
 
@@ -52,15 +52,15 @@ curl -H "Authorization: Bearer $CRON_SECRET" "http://localhost:3000/api/cron/syn
 ## Environment
 
 | Variable | Scope | Notes |
-|---|:---:|---|
-| `UPSTASH_REDIS_REST_URL` | Server | `https://...upstash.io` |
-| `UPSTASH_REDIS_REST_TOKEN` | Server | REST token |
-| `CRON_SECRET` | Server | 32+ chars, timingSafeEqual |
-| `HF_TOKEN` | Server | HF read token |
-| `OPENROUTER_API_KEY` | Server | OpenRouter |
+|---|---|---|
+| `KV_STORE_URL` | Server | REST-based cache store endpoint |
+| `KV_STORE_TOKEN` | Server | REST token for the cache store |
+| `CRON_SECRET` | Server | 32+ chars, timing-safe comparison |
+| `MODEL_PROVIDER_TOKEN` | Server | Read token for the primary model metadata provider |
+| `INFERENCE_PROVIDER_KEY` | Server | Key for the multi-model inference provider |
 | `NEXT_PUBLIC_SITE_URL` | Public | `https://vulpix.vercel.app` |
 
-Only `NEXT_PUBLIC_` is exposed to client. Never commit `.env.local`.
+Only `NEXT_PUBLIC_` variables are exposed to the client. Never commit `.env.local`.
 
 ## Commands
 
@@ -69,8 +69,8 @@ Only `NEXT_PUBLIC_` is exposed to client. Never commit `.env.local`.
 | `npm run dev` | Turbopack dev |
 | `npm run lint` | ESLint |
 | `npx tsc --noEmit` | Typecheck |
-| `npm run build` | Production + SW |
-| `npm run test:e2e` | Playwright Chromium/WebKit |
+| `npm run build` | Production + service worker |
+| `npm run test:e2e` | Playwright, Chromium/WebKit |
 
 Gate: `lint && tsc && build && test:e2e`.
 
@@ -78,97 +78,77 @@ Gate: `lint && tsc && build && test:e2e`.
 
 ```mermaid
 flowchart LR
-    %% Frontend / Client
     subgraph Client [Client Side]
         U[Browser / PWA]
         IDB[(IndexedDB)]
         U <--> IDB
     end
 
-    %% Backend / Application
     subgraph App [Next.js Application]
         N[Next.js Server]
         CR[/api/cron/sync/]
         N --- CR
     end
 
-    %% Automation Triggers
-    subgraph Automation [Triggers]
-        GH[GitHub Actions\nEvery 4h]
-        VC[Vercel Cron\nDaily Backup]
+    subgraph Automation [Scheduled Sync]
+        SC[Scheduled Jobs]
     end
 
-    %% External Services
     subgraph Services [External Services]
-        R[(Upstash Redis REST)]
-        HF[Hugging Face APIs]
-        OR[OpenRouter APIs]
+        R[(Cache Store)]
+        MP[Model Metadata Provider]
+        IP[Inference Provider]
     end
 
-    %% Core Data Flow
     U --> N
-    N --> HF
-    N --> OR
+    N --> MP
+    N --> IP
     N <--> R
 
-    %% Automation Flow
-    GH --> CR
-    VC --> CR
+    SC --> CR
     CR --> R
 
-    %% Professional Neutral Color Styling
     style Client fill:#f8fafc,stroke:#cbd5e1,stroke-width:1px,color:#0f172a
     style App fill:#f1f5f9,stroke:#94a3b8,stroke-width:1px,color:#0f172a
     style Automation fill:#f8fafc,stroke:#cbd5e1,stroke-width:1px,color:#0f172a
     style Services fill:#f1f5f9,stroke:#94a3b8,stroke-width:1px,color:#0f172a
-
-
 ```
 
-Model, benchmark, activity, and combined caches use a four-hour TTL. Provider metadata retains its route-specific TTL.
+Model, benchmark, activity, and combined caches use a four-hour TTL. Provider metadata retains its own route-specific TTL.
 
 ## API
 
 | Endpoint | Notes |
 |---|---|
-| `GET /api/models` | combined `source: redis-combined/recombined/live-fallback` `s-maxage=300` |
-| `GET /api/hf/models /datasets` | HF proxy |
-| `GET /api/arena/benchmarks /activity /providers` | live, `x-or-key` optional |
-| `GET /api/brand/[brand]?color=` | SimpleIcons→SVGL→favicon |
-| `GET /api/cron/sync` | `Bearer CRON_SECRET` |
+| `GET /api/models` | Combined view, `source: cache-combined/recombined/live-fallback`, `s-maxage=300` |
+| `GET /api/hub/models` `/datasets` | Model & dataset metadata proxy |
+| `GET /api/arena/benchmarks` `/activity` `/providers` | Live benchmark data, optional client-supplied inference key |
+| `GET /api/brand/[brand]` | Brand icon resolution with fallback chain |
+| `GET /api/cron/sync` | Sync trigger, requires `Bearer CRON_SECRET` |
 
-## Structure
+## Project Structure
 
 ```
 Vulpix/
 |-- public/
-|   |-- brands/ (18 svg)
-|   |-- icons/ (4 png)
-|   |-- screenshots/ (2 png)
-|   |-- apple-touch-icon.png
+|   |-- brands/
+|   |-- icons/
+|   |-- screenshots/
 |   `-- vulpix-logo.png
 |-- src/
 |   |-- app/
-|   |   |-- api/ (cron, hf, models, arena, brand, playground)
+|   |   |-- api/ (cron, hub, models, arena, brand, playground)
 |   |   |-- arena/page.tsx
 |   |   |-- hub/
 |   |   |-- playground/
 |   |   |-- manifest.ts
 |   |   `-- sw.ts
 |   |-- components/ (arena, hub, sections, ui)
-|   `-- lib/ (redis, rate-limit, sync, brand-logos)
+|   `-- lib/ (cache, rate-limit, sync, brand-logos)
 |-- tests/e2e/ (cron, models, pwa)
 |-- playwright.config.ts
 `-- vercel.json
 ```
-
-## Deployment (manual)
-
-**GitHub:** `vulpixlabs/vulpix` private (30-day eval). Teams `core` Admin, `dev` Write, `qa` Triage. Branch `main` protected: Require PR + QA status.
-
-**Vercel:** Import `vulpixlabs/vulpix` → Env `UPSTASH_REDIS_REST_URL/TOKEN, CRON_SECRET, HF_TOKEN, OPENROUTER_API_KEY, NEXT_PUBLIC_SITE_URL` Sensitive → Redeploy. Hobby backup cron runs daily at `0 2 * * *`.
-
-**GitHub Actions:** Add the same `CRON_SECRET` as a repository or organization secret. `.github/workflows/sync.yml` calls the production sync endpoint every four hours (`0 */4 * * *`, UTC).
 
 ## QA
 
@@ -177,8 +157,9 @@ npm run test:e2e
 npx playwright test --ui
 npx playwright show-report
 ```
-CI `.github/workflows/qa.yml` runs lint, tsc, build, 44 tests (chromium/webkit + mobile).
+
+CI runs lint, typecheck, build, and 44 end-to-end tests across Chromium, WebKit, and mobile viewports on every change to `main`.
 
 ---
 
-<p align="center">Vulpix Labs · Proprietary · 30-day eval</p>
+<p align="center">Vulpix Labs · Proprietary · Part of the Mavent ecosystem</p>
