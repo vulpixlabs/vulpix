@@ -6,7 +6,7 @@ Dokumen ini adalah checklist operasional ringkas. Penjelasan arsitektur, API, da
 
 - Proyek sudah terhubung ke Vercel.
 - Runtime Node.js mengikuti `package.json` (`22.x`).
-- Redis Cloud/Redis Marketplace terhubung ke proyek dan menyediakan URL TCP/TLS pada `REDIS_URL`.
+- Upstash Redis REST DB (`UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`) dari console.upstash.com — **langsung, bukan via Vercel Marketplace** (Free 30 MB marketplace disabled jika sudah ada 1 DB).
 - `CRON_SECRET`, `HF_TOKEN`, `OPENROUTER_API_KEY`, dan `NEXT_PUBLIC_SITE_URL` sudah diatur untuk Production; terapkan juga ke Preview bila preview harus berfungsi penuh.
 
 ## Sebelum deploy
@@ -18,14 +18,13 @@ npx tsc --noEmit
 npm run build
 ```
 
-## Konfigurasi Vercel
+## Konfigurasi Vercel (manual, tanpa Marketplace)
 
 1. Import repositori sebagai proyek Next.js.
-2. Buka **Storage** atau **Marketplace**, pilih integrasi Redis, buat resource, lalu hubungkan ke proyek.
-3. Pastikan kredensial integrasi menghasilkan `REDIS_URL`. Vulpix menggunakan `ioredis`, sehingga URL harus berupa koneksi Redis TCP/TLS, bukan hanya REST URL.
-4. Buka **Settings → Environment Variables** dan isi semua variabel yang tercantum di `.env.example`.
-5. Deploy ulang setelah mengubah environment variable.
-6. Pastikan **Settings → Cron Jobs** menampilkan `/api/cron/sync` dengan jadwal `0 * * * *`.
+2. **Jangan** pakai Marketplace `Free — 30 MB` (greyed jika sudah ada 1 DB per akun — lihat `sure-oyster-205398` di Upstash Console). Buat DB langsung di `console.upstash.com` → Copy `UPSTASH_REDIS_REST_URL` (`https://...upstash.io`) + `UPSTASH_REDIS_REST_TOKEN`.
+3. `Settings → Environment Variables` → Tambah `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `CRON_SECRET`, `HF_TOKEN`, `OPENROUTER_API_KEY`, `NEXT_PUBLIC_SITE_URL` → `Sensitive` ON, `Production + Preview` → Save.
+4. Deploy ulang setelah mengubah env.
+5. Pastikan **Settings → Cron Jobs** menampilkan `/api/cron/sync` `0 * * * *`.
 
 ## Bootstrap cache
 

@@ -70,7 +70,7 @@ function tooMany(windowSeconds: number): Response {
 
 export async function acquireLock(key: string, ttlSeconds: number): Promise<boolean> {
   try {
-    const res = await redis.set(key, "1", "EX", ttlSeconds, "NX");
+    const res = await redis.set(key, "1", { ex: ttlSeconds, nx: true });
     return res === "OK";
   } catch {
     return true;

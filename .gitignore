@@ -70,9 +70,11 @@ blob-report/
 .DS_Store
 *.pem
 
-# 7. Docs — strict: only README + deployment runbook (keep agent contracts)
+# 7. Docs — strict: only README + deployment runbook + legal (keep agent contracts)
 *.md
 !README.md
 !AGENTS.md
 !CLAUDE.md
+!LICENSE.md
+!CONTRIBUTING.md
 !docs/deployment.md

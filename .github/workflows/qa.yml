@@ -15,7 +15,8 @@ jobs:
     timeout-minutes: 20
     env:
       CRON_SECRET: ${{ secrets.CRON_SECRET }}
-      REDIS_URL: ${{ secrets.REDIS_URL }}
+      UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+      UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
       HF_TOKEN: ${{ secrets.HF_TOKEN }}
       OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
       NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000' }}

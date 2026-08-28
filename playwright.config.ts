@@ -21,7 +21,8 @@ export default defineConfig({
     env: {
       // fallback test secrets for local CI; real secrets injected via GitHub org/Vercel
       CRON_SECRET: process.env.CRON_SECRET ?? "test-cron-secret-32chars-minimum-length",
-      REDIS_URL: process.env.REDIS_URL ?? "",
+      UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL ?? "",
+      UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN ?? "",
     },
   },
   projects: [
