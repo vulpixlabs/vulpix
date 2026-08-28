@@ -87,36 +87,69 @@ export function DesignArena({ da, selected, columns }: DesignArenaProps) {
           </div>
         </div>
       ) : (
-        <div
-          className="mt-3 grid gap-6"
-          style={{ gridTemplateColumns: `repeat(${Math.min(columns, 2)}, minmax(0, 1fr))` }}
-        >
-          {selected.map((s) => (
-            <div key={s.id} className="border border-ink/10 p-4">
-              <p className="truncate text-sm font-semibold text-ink">{s.name}</p>
-              <div className="mt-3 space-y-2.5">
-                {categories.map(([key, label]) => {
-                  const hit = matchKey(da, s.id)?.[key];
-                  return (
-                    <div key={key} className="flex items-center gap-3">
-                      <span className="w-32 shrink-0 truncate text-xs text-ink/55">{label}</span>
-                      <div className="h-1.5 min-w-0 flex-1 bg-ink/8">
-                        {hit && (
-                          <div
-                            className="h-full bg-exotic transition-all duration-700"
-                            style={{ width: `${Math.min(hit.winRate, 100)}%` }}
-                          />
-                        )}
+        <div className="mt-3 border border-ink/10 bg-paper p-4">
+          {(() => {
+            const HIGHLIGHTS = ["#F54F1B", "#FF8C4A", "#FFB37F", "#FFD1AD"];
+            const pieData = selected.map((s, i) => {
+              const hits = categories.map(([k]) => matchKey(da, s.id)?.[k]).filter(Boolean) as DAScore[];
+              const avg = hits.length ? hits.reduce((a, b) => a + b.winRate, 0) / hits.length : 0;
+              return { id: s.id, name: s.name, value: avg, color: HIGHLIGHTS[i % HIGHLIGHTS.length] };
+            });
+            const total = pieData.reduce((a, b) => a + b.value, 0) || 1;
+            let acc = 0;
+            const slices = pieData.map((d) => {
+              const start = acc;
+              const angle = (d.value / total) * 360;
+              acc += angle;
+              return { ...d, start, angle };
+            });
+            const toRad = (deg: number) => ((deg - 90) * Math.PI) / 180;
+            const polar = (cx: number, cy: number, r: number, deg: number) => ({
+              x: cx + r * Math.cos(toRad(deg)),
+              y: cy + r * Math.sin(toRad(deg)),
+            });
+            const describe = (cx: number, cy: number, r: number, start: number, angle: number) => {
+              if (angle >= 359.9) return `M ${cx} ${cy} m -${r} 0 a ${r} ${r} 0 1 0 ${r * 2} 0 a ${r} ${r} 0 1 0 -${r * 2} 0`;
+              const s = polar(cx, cy, r, start);
+              const e = polar(cx, cy, r, start + angle);
+              const large = angle > 180 ? 1 : 0;
+              return `M ${cx} ${cy} L ${s.x} ${s.y} A ${r} ${r} 0 ${large} 1 ${e.x} ${e.y} Z`;
+            };
+            const missing = pieData.filter((d) => d.value === 0);
+            return (
+              <>
+                <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center">
+                  <svg viewBox="0 0 32 32" className="size-40 shrink-0">
+                    {slices.map((s) =>
+                      s.value > 0 ? <path key={s.id} d={describe(16, 16, 14, s.start, s.angle)} fill={s.color} stroke="#fff" strokeWidth={0.3} /> : null,
+                    )}
+                    <circle cx={16} cy={16} r={6.5} fill="#fff" />
+                  </svg>
+                  <div className="flex-1 space-y-2">
+                    {pieData.map((d) => (
+                      <div key={d.id} className="flex items-center gap-2.5">
+                        <span className="size-3 shrink-0 border border-ink/10" style={{ background: d.color }} />
+                        <span className="min-w-0 flex-1 truncate text-sm font-medium text-ink">{d.name}</span>
+                        <span className="shrink-0 text-sm font-semibold tabular-nums text-ink">{d.value ? `${Math.round(d.value)}%` : "-"}</span>
                       </div>
-                      <span className="w-12 shrink-0 text-right text-xs font-medium tabular-nums text-ink">
-                        {hit ? Math.round(hit.elo) : "-"}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+                    ))}
+                  </div>
+                </div>
+                {missing.length > 0 && (
+                  <div className="mt-4 grid gap-1 border-t border-ink/5 pt-3" style={{ gridTemplateColumns: `repeat(${selected.length}, minmax(0,1fr))` }}>
+                    {selected.map((s) => {
+                      const miss = missing.some((m) => m.id === s.id);
+                      return (
+                        <p key={s.id} className="text-[10px] leading-tight text-ink/45">
+                          {miss ? `${s.name} tidak punya data Design Arena` : ""}
+                        </p>
+                      );
+                    })}
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       )}
     </div>

@@ -63,25 +63,32 @@ export function BenchmarkCharts({ aa, selected }: BenchmarkChartsProps) {
             entries.push({ slug: hit.slug, name: hit.displayName, value: hit[metric.key] as number });
           }
         }
-        // ensure sort stable after adding selected
         entries.sort((a, b) => b.value - a.value);
         const bars = entries.slice(0, 10);
+        const selectedValues = selected
+          .map((s) => matchKey(aa, s.id)?.[metric.key] as number | null)
+          .filter((v): v is number => v != null);
+        const maxSel = selectedValues.length ? Math.max(...selectedValues) : Math.max(...bars.map((b) => b.value), 1);
+        const missing = selected.filter((s) => matchKey(aa, s.id)?.[metric.key] == null);
 
         return (
           <div key={metric.key} className="arena-chart border border-ink/10 bg-paper p-4">
             <p className="text-sm font-semibold text-ink">{metric.title}</p>
             <div className="relative mt-4 h-40">
-              {[100, 75, 50, 25, 0].map((tick) => (
-                <div
-                  key={tick}
-                  className="absolute inset-x-0 border-t border-ink/8"
-                  style={{ bottom: `${tick}%` }}
-                >
-                  <span className="absolute -top-2 -left-1 -translate-x-full text-[10px] tabular-nums text-ink/40">
-                    {tick}
-                  </span>
-                </div>
-              ))}
+              {[100, 75, 50, 25, 0].map((tickPct) => {
+                const tickVal = Math.round((maxSel * tickPct) / 100);
+                return (
+                  <div
+                    key={tickPct}
+                    className="absolute inset-x-0 border-t border-ink/8"
+                    style={{ bottom: `${tickPct}%` }}
+                  >
+                    <span className="absolute -top-2 -left-1 -translate-x-full text-[10px] tabular-nums text-ink/40">
+                      {tickVal}
+                    </span>
+                  </div>
+                );
+              })}
               <div className="absolute inset-0 flex items-end gap-1.5 pl-8">
                 {bars.map((bar) => {
                   const selIdx = selected.findIndex((s) => {
@@ -89,13 +96,14 @@ export function BenchmarkCharts({ aa, selected }: BenchmarkChartsProps) {
                     return bar.slug === s.id || bar.slug === base || bar.slug.startsWith(`${base}-`) || bar.slug.startsWith(`${s.id}-`) || bar.slug.startsWith(`${s.id}:`);
                   });
                   const isHi = selIdx !== -1;
+                  const h = Math.min((bar.value / maxSel) * 88 + 4, 98);
                   return (
                     <div key={bar.slug} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1">
                       <span className="text-[10px] font-semibold tabular-nums text-ink">{Math.round(bar.value)}</span>
                       <div
                         className="aa-bar-fill w-full"
                         style={{
-                          height: `${Math.max(bar.value, 1.5)}%`,
+                          height: `${Math.max(h, 4)}%`,
                           background: isHi ? HIGHLIGHTS[selIdx % HIGHLIGHTS.length] : "#ffffff",
                           border: isHi ? "none" : "1px solid rgba(0,0,0,0.15)",
                         }}
@@ -121,6 +129,7 @@ export function BenchmarkCharts({ aa, selected }: BenchmarkChartsProps) {
                         name={bar.slug.split("/")[0] ?? bar.name}
                         src={openRouterModelLogo(bar.slug)}
                         className="size-2.5 text-[5px]"
+                        fallbackClassName="border border-ink/10 bg-paper text-ink"
                       />
                       <span className={isHi ? "font-semibold text-ink" : "text-ink/50"}>{shortName(bar.name)}</span>
                     </span>
@@ -128,6 +137,18 @@ export function BenchmarkCharts({ aa, selected }: BenchmarkChartsProps) {
                 );
               })}
             </div>
+            {missing.length > 0 && (
+              <div className="mt-3 grid gap-1 border-t border-ink/5 pt-2" style={{ gridTemplateColumns: `repeat(${selected.length}, minmax(0,1fr))` }}>
+                {selected.map((s) => {
+                  const miss = missing.some((m) => m.id === s.id);
+                  return (
+                    <p key={s.id} className="text-[10px] leading-tight text-ink/45">
+                      {miss ? `${s.name} tidak punya data ${metric.title.toLowerCase()}` : ""}
+                    </p>
+                  );
+                })}
+              </div>
+            )}
           </div>
         );
       })}

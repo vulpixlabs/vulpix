@@ -323,7 +323,7 @@ export default function ArenaPage() {
               {ready ? (
                 selModels.map((m, i) => (
                   <span key={m.id}>
-                    {i > 0 && <span className="font-normal text-ink/40"> vs </span>}
+                    {i > 0 && <span className="font-normal text-ink"> vs </span>}
                     {m.name}
                   </span>
                 ))

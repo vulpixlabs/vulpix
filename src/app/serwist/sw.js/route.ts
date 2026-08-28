@@ -2,7 +2,6 @@ import { createSerwistRoute } from "@serwist/turbopack";
 
 const serwistRoute = createSerwistRoute({
   swSrc: "src/app/sw.ts",
-  additionalPrecacheEntries: [{ url: "/~offline", revision: crypto.randomUUID() }],
   useNativeEsbuild: true,
 });
 

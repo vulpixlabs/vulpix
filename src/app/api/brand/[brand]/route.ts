@@ -51,6 +51,8 @@ const BRANDS: Record<string, BrandSource> = {
   stabilityai: { simpleIcon: "stabilityai", svgl: "stability-ai.svg", domain: "stability.ai" },
   together: { svgl: "togetherai_light.svg", domain: "together.ai" },
   upstage: { simpleIcon: "upstage", domain: "upstage.ai" },
+  tencent: { domain: "tencent.com" },
+  cognitivecomputations: { domain: "cognitivecomputations.com" },
   "vercel-gateway": { simpleIcon: "vercel", svgl: "vercel_dark.svg", domain: "vercel.com" },
   xai: { simpleIcon: "xai", svgl: "xai_light.svg", domain: "x.ai" },
   zai: { domain: "z.ai" },
@@ -102,13 +104,16 @@ export async function GET(
   const brand = decodeURIComponent(raw).toLowerCase();
   const colorParam = req.nextUrl.searchParams.get("color") ?? "000000";
   const color = /^[0-9a-f]{6}$/i.test(colorParam) ? colorParam : "000000";
-  const source = BRANDS[brand];
+  const source = BRANDS[brand] ?? { domain: `${brand}.com` };
 
-  if (source) {
-    for (const url of candidates(source, color)) {
-      const response = await fetchLogo(url);
-      if (response) return response;
-    }
+  for (const url of candidates(source, color)) {
+    const response = await fetchLogo(url);
+    if (response) return response;
+  }
+  // try .ai fallback for unknown brands
+  if (!BRANDS[brand]) {
+    const alt = await fetchLogo(`https://www.google.com/s2/favicons?domain=${brand}.ai&sz=128`);
+    if (alt) return alt;
   }
 
   return new Response(fallbackLogoSvg(brand, color), {

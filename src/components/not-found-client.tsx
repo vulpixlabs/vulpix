@@ -146,13 +146,13 @@ export function NotFoundClient() {
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/hub"
-            className="nf-cta border-2 border-ink bg-paper px-5 py-2.5 text-sm font-semibold text-ink shadow-[4px_4px_0_0_#000] transition-transform hover:-translate-y-0.5"
+            className="nf-cta select-none border-2 border-ink bg-paper px-5 py-2.5 text-sm font-semibold text-ink shadow-[4px_4px_0_0_#000] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
           >
             Back to Hub
           </Link>
           <Link
             href="/"
-            className="nf-cta border-2 border-exotic bg-exotic px-5 py-2.5 text-sm font-semibold text-paper shadow-[4px_4px_0_0_#000] transition-transform hover:-translate-y-0.5"
+            className="nf-cta select-none border-2 border-exotic bg-exotic px-5 py-2.5 text-sm font-semibold text-paper shadow-[4px_4px_0_0_#000] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-exotic focus-visible:ring-offset-2"
           >
             Go Home
           </Link>

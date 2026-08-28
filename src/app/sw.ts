@@ -63,16 +63,6 @@ const serwist = new Serwist({
     cleanupOutdatedCaches: true,
     concurrency: 10,
   },
-  fallbacks: {
-    entries: [
-      {
-        url: "/~offline",
-        matcher({ request }) {
-          return request.destination === "document";
-        },
-      },
-    ],
-  },
 });
 
 serwist.addEventListeners();

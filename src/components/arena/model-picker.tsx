@@ -119,6 +119,7 @@ export function ModelPicker({ models, selectedId, onSelect, open, onOpenChange }
                     name={m.id.split("/")[0] ?? m.name}
                     src={openRouterModelLogo(m.id)}
                     className="size-4 text-[7px]"
+                    fallbackClassName="border border-ink/10 bg-paper text-ink"
                   />
                   <span className="truncate">{m.name}</span>
                   {active && <CheckIcon className="ml-auto size-3.5 shrink-0 text-exotic" />}
@@ -160,6 +161,7 @@ export function PickerTrigger({
         name={name.split(" ")[0] ?? name}
         src={icon}
         className="size-5 text-[8px]"
+        fallbackClassName="border border-ink/10 bg-paper text-ink"
         loading="eager"
       />
       <span className="truncate text-sm font-semibold text-ink">{name}</span>

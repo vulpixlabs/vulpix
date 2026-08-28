@@ -20,8 +20,6 @@ const COMPANIES: { name: string; slug: string }[] = [
   { name: "Claude", slug: "anthropic" },
   { name: "Grok", slug: "xai" },
   { name: "Replicate", slug: "replicate" },
-  { name: "Solar", slug: "upstage" },
-  { name: "Yi", slug: "01dotai" },
   { name: "Databricks", slug: "databricks" },
   { name: "ElevenLabs", slug: "elevenlabs" },
 ];

@@ -1,8 +1,12 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
-/node_modules
-/.pnp
+# 1. Secrets — keep .env.example as contract
+.env*
+!.env.example
+
+# 2. Dependencies
+node_modules/
+.pnp
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -10,45 +14,65 @@
 !.yarn/releases
 !.yarn/versions
 
-# testing
-/coverage
+# 3. Build & framework
+.next/
+out/
+build/
+dist/
+.turbo/
+coverage/
+.vercel/
+*.tsbuildinfo
+next-env.d.ts
 
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
+# 4. Logs & QA artifacts
+*.log
+logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+.playwright-mcp/
+playwright-report/
+test-results/
+blob-report/
 
-# env files (can opt-in for committing if needed)
-.env*
+# 5. Images — strict, but keep PWA required assets
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.avif
+!public/vulpix-logo.png
+!public/icons/**
+!public/screenshots/**
+!public/apple-touch-icon.png
+!public/brands/anthropic.svg
+!public/brands/cohere.svg
+!public/brands/databricks.svg
+!public/brands/deepseek.svg
+!public/brands/elevenlabs.svg
+!public/brands/google.svg
+!public/brands/googlegemini.svg
+!public/brands/meta.svg
+!public/brands/microsoft.svg
+!public/brands/minimax.svg
+!public/brands/mistralai.svg
+!public/brands/moonshotai.svg
+!public/brands/nvidia.svg
+!public/brands/openai.svg
+!public/brands/qwen.svg
+!public/brands/replicate.svg
+!public/brands/stabilityai.svg
+!public/brands/xai.svg
 
-# vercel
-.vercel
+# 6. Misc OS
+.DS_Store
+*.pem
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-# repository hygiene
-!.env.example
-/.playwright-mcp/
-/*.png
-
-# Ignore arbitrary Markdown; keep canonical project documentation.
+# 7. Docs — strict: only README + deployment runbook (keep agent contracts)
 *.md
 !README.md
 !AGENTS.md
 !CLAUDE.md
-!docs/
-!docs/**/*.md
+!docs/deployment.md
