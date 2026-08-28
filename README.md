@@ -82,12 +82,13 @@ flowchart LR
     N --> R[(Upstash Redis REST)]
     N --> HF[HF APIs]
     N --> OR[OpenRouter APIs]
-    VC[Cron 0 * * * *] --> CR[/api/cron/sync]
+    GH[GitHub Actions every 4h] --> CR[/api/cron/sync]
+    VC[Vercel daily backup] --> CR
     CR --> R
     U --> IDB[(IndexedDB)]
 ```
 
-Keys: `models:huggingface:data:6h`, `models:openrouter:data:1h`, `models:all:combined:1h`, `models:openrouter:benchmarks:6h`, `models:openrouter:activity:6h`, `models:providers:<slug>:1h`.
+Model, benchmark, activity, and combined caches use a four-hour TTL. Provider metadata retains its route-specific TTL.
 
 ## API
 
@@ -128,7 +129,9 @@ Vulpix/
 
 **GitHub:** `vulpixlabs/vulpix` private (30-day eval). Teams `core` Admin, `dev` Write, `qa` Triage. Branch `main` protected: Require PR + QA status.
 
-**Vercel:** Import `vulpixlabs/vulpix` → Env `UPSTASH_REDIS_REST_URL/TOKEN, CRON_SECRET, HF_TOKEN, OPENROUTER_API_KEY, NEXT_PUBLIC_SITE_URL` Sensitive → Redeploy. Cron auto `0 * * * *`.
+**Vercel:** Import `vulpixlabs/vulpix` → Env `UPSTASH_REDIS_REST_URL/TOKEN, CRON_SECRET, HF_TOKEN, OPENROUTER_API_KEY, NEXT_PUBLIC_SITE_URL` Sensitive → Redeploy. Hobby backup cron runs daily at `0 2 * * *`.
+
+**GitHub Actions:** Add the same `CRON_SECRET` as a repository or organization secret. `.github/workflows/sync.yml` calls the production sync endpoint every four hours (`0 */4 * * *`, UTC).
 
 ## QA
 
