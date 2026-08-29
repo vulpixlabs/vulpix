@@ -51,7 +51,7 @@ PWA web memakai `display: standalone`, sehingga instalasi dari browser tidak men
 
 1. Gunakan application ID `app.vercel.vulpixlabs.twa` dan origin `https://vulpixlabs.vercel.app` di PWABuilder.
 2. Simpan release signing key; jangan mengganti key antar-rilis.
-3. Fingerprint SHA-256 sertifikat release PWABuilder saat ini adalah `3B:2D:78:A1:F1:95:32:C7:81:47:47:74:3A:17:48:01:F2:4B:3F:83:56:1C:F0:A6:33:20:E4:2F:4D:26:BD:02`.
+3. Fingerprint SHA-256 sertifikat release PWABuilder saat ini adalah `7C:51:6D:D7:F7:81:B5:15:32:FC:C2:CE:64:8A:D6:D1:E9:7E:C1:EE:21:D9:07:3E:EC:B6:65:88:5B:1E:B4:1E`.
 4. `public/.well-known/assetlinks.json` harus tetap cocok dengan package dan signing key release:
 
 ```json
@@ -61,7 +61,7 @@ PWA web memakai `display: standalone`, sehingga instalasi dari browser tidak men
     "target": {
       "namespace": "android_app",
       "package_name": "app.vercel.vulpixlabs.twa",
-      "sha256_cert_fingerprints": ["3B:2D:78:A1:F1:95:32:C7:81:47:47:74:3A:17:48:01:F2:4B:3F:83:56:1C:F0:A6:33:20:E4:2F:4D:26:BD:02"]
+      "sha256_cert_fingerprints": ["7C:51:6D:D7:F7:81:B5:15:32:FC:C2:CE:64:8A:D6:D1:E9:7E:C1:EE:21:D9:07:3E:EC:B6:65:88:5B:1E:B4:1E"]
     }
   }
 ]

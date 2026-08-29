@@ -72,6 +72,9 @@ blob-report/
 # 6. Misc OS
 .DS_Store
 *.pem
+*.apk
+*.aab
+android/
 
 # 7. Docs — strict: only README + deployment runbook + legal (keep agent contracts)
 *.md
