@@ -42,6 +42,8 @@ interface SettingsRecord {
   maxTokens?: number;
   customSystemPrompt?: string;
   customProviders?: CustomProviderRecord[];
+  modelNotifications?: boolean;
+  modelNotificationsCheckedAt?: number;
 }
 
 interface ProjectRecord {
@@ -149,6 +151,16 @@ export async function getSettings(): Promise<SettingsRecord> {
 
 export async function putSettings(s: SettingsRecord) {
   await (await db()).put("settings", s);
+}
+
+export async function updateSettings(patch: Partial<SettingsRecord>) {
+  const d = await db();
+  const tx = d.transaction("settings", "readwrite");
+  const current = (await tx.store.get("settings")) ?? DEFAULT_SETTINGS;
+  const next = { ...current, ...patch };
+  await tx.store.put(next);
+  await tx.done;
+  return next;
 }
 
 export type { ChatRecord, ArtifactRecord, SettingsRecord, ProjectRecord, CustomProviderRecord };

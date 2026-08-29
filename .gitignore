@@ -3,6 +3,9 @@
 # 1. Secrets — keep .env.example as contract
 .env*
 !.env.example
+*.keystore
+*.jks
+signing-key-info.txt
 
 # 2. Dependencies
 node_modules/

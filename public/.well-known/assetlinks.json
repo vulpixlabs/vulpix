@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.vercel.vulpixlabs.twa",
+      "sha256_cert_fingerprints": [
+        "3B:2D:78:A1:F1:95:32:C7:81:47:47:74:3A:17:48:01:F2:4B:3F:83:56:1C:F0:A6:33:20:E4:2F:4D:26:BD:02"
+      ]
+    }
+  }
+]

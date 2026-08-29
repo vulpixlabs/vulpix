@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { Trash2Icon } from "lucide-react";
+import { BellIcon, Trash2Icon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -11,11 +11,51 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 import { usePlayground } from "@/lib/playground/store";
+
+type RegistrationWithPeriodicSync = ServiceWorkerRegistration & {
+  periodicSync?: {
+    register: (tag: string, options: { minInterval: number }) => Promise<void>;
+    unregister: (tag: string) => Promise<void>;
+  };
+};
+
+const MODEL_SYNC_TAG = "vulpix-model-updates";
+const ONE_DAY = 24 * 60 * 60 * 1_000;
 
 export function SettingsDialog() {
   const { settingsOpen, setSettingsOpen, settings, saveSettings, setView } = usePlayground();
   const [prompt, setPrompt] = useState(settings.customSystemPrompt ?? "");
+
+  const setModelNotifications = async (enabled: boolean) => {
+    if (!("Notification" in window) || !("serviceWorker" in navigator)) {
+      toast.error("Notifications are not supported in this browser");
+      return;
+    }
+
+    if (!enabled) {
+      await saveSettings({ modelNotifications: false });
+      const registration = (await navigator.serviceWorker.ready) as RegistrationWithPeriodicSync;
+      await registration.periodicSync?.unregister(MODEL_SYNC_TAG).catch(() => {
+        toast.warning("Alerts are off, but the background schedule could not be removed");
+      });
+      return;
+    }
+
+    const permission = await Notification.requestPermission();
+    if (permission !== "granted") {
+      await saveSettings({ modelNotifications: false });
+      toast.error("Notification permission was not granted");
+      return;
+    }
+
+    await saveSettings({ modelNotifications: true });
+    const registration = (await navigator.serviceWorker.ready) as RegistrationWithPeriodicSync;
+    await registration.periodicSync?.register(MODEL_SYNC_TAG, { minInterval: ONE_DAY }).catch(() => {});
+    registration.active?.postMessage({ type: "CHECK_MODEL_UPDATES" });
+    toast.success("Model alerts enabled");
+  };
 
   const exportData = () => {
     const blob = new Blob([JSON.stringify({ settings, exported: new Date().toISOString() }, null, 2)], {
@@ -59,6 +99,26 @@ export function SettingsDialog() {
               <span>balanced</span>
               <span>wild</span>
             </div>
+          </div>
+
+          <div className="flex items-start justify-between gap-4 border-2 border-ink p-4">
+            <div className="flex min-w-0 gap-3">
+              <BellIcon className="mt-0.5 size-4 shrink-0 text-exotic" />
+              <div>
+                <label htmlFor="model-notifications" className="text-sm font-bold">
+                  New and trending model alerts
+                </label>
+                <p className="mt-1 text-xs leading-relaxed text-ink/50">
+                  Checks daily when supported, otherwise while Vulpix is open. No remote push server.
+                </p>
+              </div>
+            </div>
+            <Switch
+              id="model-notifications"
+              checked={Boolean(settings.modelNotifications)}
+              onCheckedChange={(checked) => void setModelNotifications(checked)}
+              aria-label="New and trending model alerts"
+            />
           </div>
 
           <div>

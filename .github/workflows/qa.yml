@@ -40,7 +40,7 @@ jobs:
         run: npm run lint
 
       - name: Typecheck
-        run: npx tsc --noEmit
+        run: npm run typecheck
 
       - name: Build (Turbopack + Serwist)
         run: npm run build

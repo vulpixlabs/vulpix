@@ -24,7 +24,21 @@ const SUGGESTIONS = [
 
 const GREETING_WORDS = ["mind?", "idea?", "plan?", "problem?", "project?"];
 
-export function ChatView({ onOpenSidebar }: { onOpenSidebar: () => void }) {
+interface ChatViewProps {
+  onOpenSidebar: () => void;
+  launchText?: string;
+  launchFiles?: File[];
+  onLaunchTextConsumed?: () => void;
+  onLaunchFilesConsumed?: () => void;
+}
+
+export function ChatView({
+  onOpenSidebar,
+  launchText,
+  launchFiles,
+  onLaunchTextConsumed,
+  onLaunchFilesConsumed,
+}: ChatViewProps) {
   const {
     activeChat,
     updateActiveChat,
@@ -58,6 +72,7 @@ export function ChatView({ onOpenSidebar }: { onOpenSidebar: () => void }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const chatId = activeChat?.id ?? null;
   const savedRef = useRef<string | null>(null);
+  const consumedLaunchTextRef = useRef("");
 
   const { messages, sendMessage, status, stop, regenerate, setMessages, error } = useChat({
     messages: activeChat?.messages ?? [],
@@ -104,6 +119,13 @@ export function ChatView({ onOpenSidebar }: { onOpenSidebar: () => void }) {
     window.addEventListener("pg:skill", onSkill);
     return () => window.removeEventListener("pg:skill", onSkill);
   }, []);
+
+  useEffect(() => {
+    if (!launchText || consumedLaunchTextRef.current === launchText) return;
+    consumedLaunchTextRef.current = launchText;
+    setInput((current) => [current.trim(), launchText].filter(Boolean).join("\n"));
+    onLaunchTextConsumed?.();
+  }, [launchText, onLaunchTextConsumed]);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -222,6 +244,8 @@ export function ChatView({ onOpenSidebar }: { onOpenSidebar: () => void }) {
               onNeedSetup={() => setView("providers")}
               keys={settings.keys}
               providers={allProviders}
+              incomingFiles={launchFiles}
+              onIncomingFilesConsumed={onLaunchFilesConsumed}
             />
           </div>
           <div className="mt-4 flex flex-wrap justify-center gap-2">
@@ -344,6 +368,8 @@ export function ChatView({ onOpenSidebar }: { onOpenSidebar: () => void }) {
         onNeedSetup={() => setView("providers")}
         keys={settings.keys}
         providers={allProviders}
+        incomingFiles={launchFiles}
+        onIncomingFilesConsumed={onLaunchFilesConsumed}
       />
     </div>
   );

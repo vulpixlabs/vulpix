@@ -22,6 +22,8 @@ import { providerById, type ProviderDef } from "@/lib/playground/providers";
 import type { ModelInfo } from "@/app/api/playground/models/route";
 import type { FileUIPart } from "ai";
 
+const MAX_IMAGE_BYTES = 10_000_000;
+
 export interface Attachment {
   id: string;
   name: string;
@@ -149,6 +151,8 @@ export interface ComposerProps {
   onNeedSetup: () => void;
   keys: Record<string, string>;
   providers: ProviderDef[];
+  incomingFiles?: File[];
+  onIncomingFilesConsumed?: () => void;
 }
 
 export function Composer(p: ComposerProps) {
@@ -224,26 +228,50 @@ export function Composer(p: ComposerProps) {
     setPickerQuery("");
   };
 
-  const addFiles = async (files: FileList | null) => {
+  const addFiles = async (files: FileList | File[] | null) => {
     if (!files) return;
     for (const file of Array.from(files).slice(0, 5)) {
       const id = `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
       if (file.type.startsWith("image/")) {
-        const dataUrl = await new Promise<string>((res) => {
+        if (file.size > MAX_IMAGE_BYTES) {
+          setAttachments((prev) => [...prev, { id, name: `${file.name} (too large, skipped)`, kind: "text", text: "" }]);
+          continue;
+        }
+        const dataUrl = await new Promise<string>((resolve, reject) => {
           const fr = new FileReader();
-          fr.onload = () => res(String(fr.result));
+          fr.onload = () => resolve(String(fr.result));
+          fr.onerror = () => reject(fr.error ?? new Error("Unable to read image"));
+          fr.onabort = () => reject(new Error("Image read was cancelled"));
           fr.readAsDataURL(file);
-        });
+        }).catch(() => "");
+        if (!dataUrl) {
+          setAttachments((prev) => [...prev, { id, name: `${file.name} (unreadable, skipped)`, kind: "text", text: "" }]);
+          continue;
+        }
         setAttachments((prev) => [...prev, { id, name: file.name, kind: "image", mediaType: file.type, dataUrl }]);
       } else if (file.size < 200_000) {
-        const text = await file.text();
-        setAttachments((prev) => [...prev, { id, name: file.name, kind: "text", text }]);
+        const text = await file.text().catch(() => null);
+        setAttachments((prev) => [
+          ...prev,
+          text === null
+            ? { id, name: `${file.name} (unreadable, skipped)`, kind: "text", text: "" }
+            : { id, name: file.name, kind: "text", text },
+        ]);
       } else {
         setAttachments((prev) => [...prev, { id, name: `${file.name} (too large, skipped)`, kind: "text", text: "" }]);
       }
     }
     setPicker(null);
   };
+
+  useEffect(() => {
+    if (!p.incomingFiles?.length) return;
+    queueMicrotask(() => {
+      void addFiles(p.incomingFiles ?? null).finally(() => p.onIncomingFilesConsumed?.());
+    });
+    // A new array represents a new OS launch payload.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [p.incomingFiles]);
 
   const submit = () => {
     if (p.busy) return;

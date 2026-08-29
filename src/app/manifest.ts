@@ -10,6 +10,9 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: "/",
     scope: "/",
     display: "standalone",
+    display_override: ["standalone"],
+    launch_handler: { client_mode: "navigate-existing" },
+    prefer_related_applications: false,
     orientation: "portrait-primary",
     background_color: "#000000",
     theme_color: "#F54F1B",
@@ -69,6 +72,37 @@ export default function manifest(): MetadataRoute.Manifest {
         description: "Compare models side by side",
         url: "/arena",
         icons: [{ src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
+      },
+    ],
+    file_handlers: [
+      {
+        action: "/playground?source=file",
+        accept: {
+          "image/png": [".png"],
+          "image/jpeg": [".jpg", ".jpeg"],
+          "image/webp": [".webp"],
+          "image/gif": [".gif"],
+          "text/plain": [".txt"],
+          "text/markdown": [".md", ".markdown"],
+          "application/json": [".json"],
+          "text/csv": [".csv"],
+        },
+      },
+    ],
+    share_target: {
+      action: "/api/pwa/share",
+      method: "POST",
+      enctype: "application/x-www-form-urlencoded",
+      params: {
+        title: "shareTitle",
+        text: "shareText",
+        url: "shareUrl",
+      },
+    },
+    protocol_handlers: [
+      {
+        protocol: "web+vulpix",
+        url: "/playground?protocol=%s",
       },
     ],
   };

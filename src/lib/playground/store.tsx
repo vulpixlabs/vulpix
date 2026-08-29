@@ -17,7 +17,7 @@ import {
   listChats,
   putArtifact,
   putChat,
-  putSettings,
+  updateSettings,
   uid,
   type ArtifactRecord,
   type ChatRecord,
@@ -84,11 +84,8 @@ export function PlaygroundProvider({ children }: { children: React.ReactNode }) 
   const setView = useCallback((v: PlaygroundView) => setViewState(v), []);
 
   const saveSettings = useCallback(async (patch: Partial<SettingsRecord>) => {
-    setSettings((prev) => {
-      const next = { ...prev, ...patch };
-      void putSettings(next);
-      return next;
-    });
+    setSettings((prev) => ({ ...prev, ...patch }));
+    await updateSettings(patch);
   }, []);
 
   const refreshChats = useCallback(async () => setChats(await listChats()), []);

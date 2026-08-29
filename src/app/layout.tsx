@@ -25,7 +25,7 @@ const instrumentSerif = Instrument_Serif({
   fallback: ["ui-serif", "Georgia"],
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://vulpix.vercel.app";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://vulpixlabs.vercel.app";
 const DESCRIPTION = "The intelligent gateway to AI.";
 
 export const metadata: Metadata = {

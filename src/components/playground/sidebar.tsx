@@ -29,7 +29,7 @@ const NAV: { id: PlaygroundView; label: string; icon: typeof MessageSquareIcon }
 ];
 
 export function Sidebar({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
-  const { view, setView, chats, openChat, removeChat, newChat, settings, activeChat } = usePlayground();
+  const { view, setView, chats, openChat, removeChat, newChat, settings, activeChat, setSettingsOpen } = usePlayground();
   const activeId = activeChat?.id ?? "";
   const [collapsed, setCollapsed] = useState(false);
 
@@ -187,6 +187,22 @@ export function Sidebar({ open, onOpenChange }: { open: boolean; onOpenChange: (
         )}
 
         {collapsed && <div className="min-h-0 flex-1" />}
+
+        <button
+          onClick={() => {
+            setSettingsOpen(true);
+            onOpenChange(false);
+          }}
+          aria-label="Open settings"
+          title="Settings"
+          className={cn(
+            "flex shrink-0 items-center gap-2.5 border-t border-ink/10 text-left text-sm font-semibold transition-none hover:bg-ink/5 hover:text-exotic",
+            collapsed ? "justify-center py-3" : "px-4 py-2.5",
+          )}
+        >
+          <SettingsIcon className="size-4 shrink-0" />
+          {!collapsed && <span>Settings</span>}
+        </button>
 
         <button
           title={collapsed ? `${totalConnected || "No"} providers` : undefined}

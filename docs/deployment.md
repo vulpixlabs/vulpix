@@ -14,7 +14,7 @@ Dokumen ini adalah checklist operasional ringkas. Penjelasan arsitektur, API, da
 ```bash
 npm ci
 npm run lint
-npx tsc --noEmit
+npm run typecheck
 npm run build
 ```
 
@@ -30,7 +30,7 @@ npm run build
 
 ```bash
 curl -H "Authorization: Bearer $CRON_SECRET" \
-  "https://vulpix.vercel.app/api/cron/sync?force=all"
+  "https://vulpixlabs.vercel.app/api/cron/sync?force=all"
 ```
 
 Respons sehat mengandung `ok`, status `hf`/`or`/`bench`/`act`, dan jumlah `combined` lebih dari nol.
@@ -38,12 +38,38 @@ Respons sehat mengandung `ok`, status `hf`/`or`/`bench`/`act`, dan jumlah `combi
 ## Smoke test
 
 ```bash
-curl "https://vulpix.vercel.app/api/models?limit=3"
-curl "https://vulpix.vercel.app/api/arena/benchmarks"
-curl -I "https://vulpix.vercel.app/api/brand/openai?color=000000"
+curl "https://vulpixlabs.vercel.app/api/models?limit=3"
+curl "https://vulpixlabs.vercel.app/api/arena/benchmarks"
+curl -I "https://vulpixlabs.vercel.app/api/brand/openai?color=000000"
 ```
 
 Periksa juga `/`, `/hub`, `/arena`, `/playground`, manifest PWA, service worker, console browser, dan tidak adanya gambar dengan `naturalWidth === 0`.
+
+## APK tanpa address bar
+
+PWA web memakai `display: standalone`, sehingga instalasi dari browser tidak menampilkan address bar. APK PWABuilder/TWA juga memerlukan Digital Asset Links agar tidak turun ke Custom Tab yang menampilkan domain.
+
+1. Gunakan application ID `app.vercel.vulpixlabs.twa` dan origin `https://vulpixlabs.vercel.app` di PWABuilder.
+2. Simpan release signing key; jangan mengganti key antar-rilis.
+3. Fingerprint SHA-256 sertifikat release PWABuilder saat ini adalah `3B:2D:78:A1:F1:95:32:C7:81:47:47:74:3A:17:48:01:F2:4B:3F:83:56:1C:F0:A6:33:20:E4:2F:4D:26:BD:02`.
+4. `public/.well-known/assetlinks.json` harus tetap cocok dengan package dan signing key release:
+
+```json
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.vercel.vulpixlabs.twa",
+      "sha256_cert_fingerprints": ["3B:2D:78:A1:F1:95:32:C7:81:47:47:74:3A:17:48:01:F2:4B:3F:83:56:1C:F0:A6:33:20:E4:2F:4D:26:BD:02"]
+    }
+  }
+]
+```
+
+Setelah deploy, pastikan `https://vulpixlabs.vercel.app/.well-known/assetlinks.json` merespons `200` tanpa redirect, lalu uji APK release di perangkat. Jika package atau fingerprint tidak cocok, address bar/domain dapat muncul. Jangan commit `signing.keystore`, password, atau file informasi signing; `.gitignore` memblokir artefak tersebut.
+
+Avatar project Vercel diatur manual melalui dashboard menggunakan `public/icons/icon-512.png`; avatar project bukan favicon aplikasi.
 
 ## Rollback
 
