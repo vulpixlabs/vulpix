@@ -78,6 +78,7 @@ android/
 
 # 7. Site verification / tracking HTML files
 google*.html
+!public/google*.html
 
 # 8. Docs — strict: only README + deployment runbook + legal (keep agent contracts)
 *.md
