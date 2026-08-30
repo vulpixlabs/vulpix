@@ -76,7 +76,10 @@ blob-report/
 *.aab
 android/
 
-# 7. Docs — strict: only README + deployment runbook + legal (keep agent contracts)
+# 7. Site verification / tracking HTML files
+google*.html
+
+# 8. Docs — strict: only README + deployment runbook + legal (keep agent contracts)
 *.md
 !README.md
 !AGENTS.md
